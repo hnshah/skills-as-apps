@@ -86,15 +86,14 @@ Open Loops' core technical idea is state reconstruction: identify a possible obl
 
 ### Fixture
 
-The first controlled dataset should contain:
+The first controlled dataset contains:
 
 - explicit unresolved commitments
 - completed commitments
-- one cancelled/superseded item
-- one delegated item
-- duplicates expressed in multiple files
+- a delegated item
 - ambiguous social language
-- one denied file outside the approved root
+- upcoming preparation
+- a denied file outside the approved root
 
 ### Runtime acceptance
 
@@ -124,7 +123,7 @@ Done.
 
 ### Milestone 1 — Inspect a portable skill
 
-Done in the initial scaffold.
+Done.
 
 ```bash
 skills-as-apps inspect ../open-loops
@@ -136,7 +135,7 @@ Requirements:
 - require `name` and `description`
 - discover `references/`, `scripts/`, and `assets/`
 - do not eagerly load resource contents for inspection
-- grant no capabilities
+- grant no external capabilities
 
 ### Milestone 2 — Give the skill a local model
 
@@ -156,7 +155,7 @@ Requirements:
 
 ### Milestone 3 — Give the skill read-only hands
 
-Done in the initial scaffold.
+Done.
 
 ```bash
 skills-as-apps run ../open-loops \
@@ -164,7 +163,7 @@ skills-as-apps run ../open-loops \
   --allow-read ./fixtures/open-loops
 ```
 
-V0 tools:
+V0 external tools:
 
 ```text
 filesystem_list
@@ -178,22 +177,27 @@ Permission class:
 filesystem.read
 ```
 
-The CLI uses ephemeral grants until persistent permission storage is built.
+The CLI uses ephemeral grants until persistent permission storage is built. Skill-owned references and scripts are loaded progressively through the separate `skill_resource_read` runtime tool and do not widen external filesystem scope.
 
 ### Milestone 4 — Persist an inspectable run
 
-Next.
+Done.
 
-Add:
+Every invocation now receives a run id and writes a private local record under `~/.skills-as-apps/runs/<id>/` by default. The root can be changed with `SKILLS_AS_APPS_HOME`.
+
+Persisted data includes:
 
 ```text
 run id
-skill identity/hash
+skill identity + exact SKILL.md sha256
 model id
 objective
-approved roots
-model/tool event log
-started/ended timestamps
+approved filesystem roots
+ordered model/tool event log
+model responses
+capability results
+timestamps
+turn count
 result
 failure state
 ```
@@ -205,9 +209,13 @@ skills-as-apps runs
 skills-as-apps inspect-run <id>
 ```
 
+`events.jsonl` deliberately records tool results and model output for inspectability. It may therefore contain source data from approved local files and must be treated as private local runtime data.
+
 ### Milestone 5 — Persist skill state
 
-SQLite + artifact filesystem. Keep state machine-readable and distinct from free-form memory.
+Next.
+
+Use SQLite plus an artifact filesystem. Keep durable state structured and distinct from free-form memory. A skill should be able to resume useful local work without the runtime learning domain-specific semantics.
 
 ### Milestone 6 — Persistent permission grants
 
@@ -272,6 +280,7 @@ The first public demo should visibly show:
 - approved filesystem scope
 - one denied access attempt or permission boundary test
 - evidence-backed output
+- the resulting inspectable run record
 - zero cloud source-data dependency
 
 ## Launch language
@@ -288,9 +297,7 @@ Supporting explanation:
 
 ## Immediate next work
 
-1. Run the scaffold's CI locally.
-2. Run `inspect` against the actual public Open Loops checkout.
-3. Add the first real Open Loops filesystem fixture.
-4. Run a real installed Ollama model and capture the first transcript.
-5. Turn every runtime failure into a conformance test.
-6. Then implement Milestone 4 run persistence.
+1. Run the real Open Loops smoke test against an installed local Ollama model and capture the full inspectable transcript.
+2. Turn every real runtime failure into a conformance test.
+3. Implement Milestone 5 structured durable state.
+4. Expand the compatibility corpus beyond Open Loops only after the first real local run is solid.
