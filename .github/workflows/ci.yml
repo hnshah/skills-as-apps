@@ -1,0 +1,19 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm test
+      - name: Prove compatibility against live Open Loops source
+        run: |
+          git clone --depth 1 https://github.com/hnshah/open-loops.git /tmp/open-loops
+          node dist/src/cli/main.js inspect /tmp/open-loops | tee /tmp/inspect.json
+          grep '"name": "open-loops"' /tmp/inspect.json

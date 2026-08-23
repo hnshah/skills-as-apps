@@ -1,0 +1,25 @@
+{
+  "name": "skills-as-apps",
+  "version": "0.1.0-dev",
+  "private": true,
+  "description": "Turn portable Agent Skills into local software.",
+  "type": "module",
+  "bin": {
+    "skills-as-apps": "./dist/src/cli/main.js",
+    "saa": "./dist/src/cli/main.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/**/*.test.js",
+    "test:unit": "npm run build && node --test dist/tests/unit/*.test.js",
+    "test:integration": "npm run build && node --test dist/tests/integration/*.test.js",
+    "dev": "npm run build && node dist/src/cli/main.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
