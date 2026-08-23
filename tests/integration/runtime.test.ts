@@ -53,8 +53,9 @@ test('Milestones 1-3: portable resources, local model loop, and explicit read sc
   assert.equal(skill.resources[0].relativePath, path.join('references', 'completion-detection.md'));
 
   const events: any[] = [];
-  const result = await runSkill({ skillPath: repo, objective: 'Find my open loops.', model: new ScriptedModel(allowedFile, deniedFile), allowRead: [allowed], onEvent: (e) => events.push(e) });
+  const result = await runSkill({ skillPath: repo, objective: 'Find my open loops.', model: new ScriptedModel(allowedFile, deniedFile), allowRead: [allowed], onEvent: (e) => { events.push(e); } });
   assert.match(result.output, /Send the deck/);
   assert.ok(events.some((e) => e.type === 'tool.result' && e.name === 'skill_resource_read' && e.ok === true));
   assert.ok(events.some((e) => e.type === 'tool.result' && e.name === 'filesystem_read' && e.ok === false));
+  assert.ok(events.some((e) => e.type === 'model.response'));
 });
