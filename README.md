@@ -21,8 +21,9 @@ Pre-v0.1. The first vertical proof is intentionally narrow.
 - **Milestone 1 — done:** discover and inspect a portable `SKILL.md`, including the standard `skills/<name>/SKILL.md` repo layout used by [`open-loops`](https://github.com/hnshah/open-loops).
 - **Milestone 2 — done in code:** execute the skill with an Ollama model through Skills as Apps' own model/tool loop. The adapter is covered by a local mock-protocol integration test; a real Ollama model is the machine-level smoke test.
 - **Milestone 3 — done:** expose read-only filesystem operations only inside explicitly approved roots and deny reads outside them.
+- **Milestone 4 — done:** persist inspectable local run records, model/tool events, results, failures, skill hashes, and permission scope.
 
-No state, schedules, persistent grants, marketplace, desktop UI, or multi-agent orchestration yet.
+No durable skill state, schedules, persistent grants, marketplace, desktop UI, or multi-agent orchestration yet.
 
 ## Why this exists
 
@@ -81,6 +82,17 @@ skills-as-apps run <skill-directory-or-repo> \
 
 Multiple `--allow-read` flags are allowed. V0 grants are intentionally ephemeral for one invocation.
 
+Every run is recorded locally under `~/.skills-as-apps/runs/` by default. Set `SKILLS_AS_APPS_HOME` to override the runtime data directory. Run records include model responses and tool results, so treat this directory as private local data.
+
+### Runs
+
+```bash
+skills-as-apps runs
+skills-as-apps inspect-run <run-id>
+```
+
+`inspect-run` returns the run identity, skill hash, model, objective, approved filesystem roots, timestamps, result or failure, and the ordered model/tool event stream.
+
 ## V0 architectural laws
 
 1. **The skill stays standard.** No proprietary manifest is required to run a portable skill.
@@ -108,7 +120,7 @@ permissioned capability tools
 result
 ```
 
-The next milestones add inspectable run records, state, persistent grants, eval execution, and GitHub installation in that order.
+The next milestones add durable skill state, persistent grants, eval execution, and GitHub installation in that order.
 
 ## Development
 
@@ -119,14 +131,7 @@ npm run build
 npm test
 ```
 
-The test suite includes a Milestones 1–3 vertical test that verifies:
-
-- `SKILL.md` discovery
-- resource discovery
-- a local model/tool loop
-- an allowed file read
-- a denied out-of-scope file read
-- a final skill result
+The test suite verifies portable skill discovery, progressive skill-resource loading, the local model/tool loop, allowed and denied filesystem access, Ollama protocol wiring, and local run persistence.
 
 CI also clones the current public Open Loops repository and proves that it is discoverable unchanged.
 
