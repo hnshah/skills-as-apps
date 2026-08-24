@@ -29,16 +29,33 @@ async function emit(handler: RunEventHandler | undefined, event: RunEvent): Prom
 }
 
 function systemPrompt(skill: LoadedSkill, allowedRoots: string[]): string {
-  const resources = skill.resources.map((r) => `- ${r.kind}: ${r.relativePath}`).join('\n');
+  const readableResources = skill.resources
+    .filter((r) => r.kind !== 'asset')
+    .map((r) => `- ${r.kind}: ${r.relativePath}`)
+    .join('\n');
+  const packagedAssets = skill.resources
+    .filter((r) => r.kind === 'asset')
+    .map((r) => `- asset: ${r.relativePath}`)
+    .join('\n');
+  const externalScope = allowedRoots.length
+    ? `Readable external filesystem roots: ${allowedRoots.map((r) => path.resolve(r)).join(', ')}`
+    : 'No external filesystem access has been granted.';
+
   return [
     'You are executing a portable Agent Skill inside Skills as Apps.',
     'Follow the skill instructions as the governing procedure for this run.',
-    'Use skill_resource_read when the skill tells you to consult one of its listed references or scripts.',
-    'Use external capability tools only when needed. Never claim to have read evidence you did not inspect.',
-    allowedRoots.length ? `Readable external filesystem roots: ${allowedRoots.map((r) => path.resolve(r)).join(', ')}` : 'No external filesystem access has been granted.',
+    'Use skill_resource_read only for the readable references and scripts listed below.',
+    'Packaged assets are not readable through skill_resource_read. Never infer or invent their contents.',
+    'When the objective depends on user or workspace evidence and readable external roots are granted, inspect those roots with filesystem_list/filesystem_read before answering.',
+    'Skill instructions, examples, references, and assets are not substitutes for the user or workspace evidence required by the objective.',
+    'Never claim to have read evidence you did not inspect.',
+    externalScope,
     '',
-    '# Available skill resources',
-    resources || '(none)',
+    '# Readable skill resources',
+    readableResources || '(none)',
+    '',
+    '# Packaged assets (not readable through skill_resource_read)',
+    packagedAssets || '(none)',
     '',
     `# Skill: ${skill.name}`,
     skill.instructions,
